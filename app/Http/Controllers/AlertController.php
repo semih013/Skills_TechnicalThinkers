@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Alert;
 use App\Models\Farmer;
 use App\Services\SmsService;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
@@ -37,28 +38,9 @@ class AlertController extends Controller
     }
 
     /**
-     * Translate message based on farmer language
-     */
-    private function translateMessage($message, $language)
-    {
-        if ($language === 'Swahili') {
-            return match (strtolower(trim($message))) {
-                'cloudy' => 'Kuna mawingu',
-                'sunny' => 'Kuna jua',
-                'rain expected tomorrow. delay planting by 2 days.' => 'Mvua inatarajiwa kesho. Chelewesha kupanda kwa siku 2.',
-                'fall armyworm detected nearby. check maize crops today.' => 'Funza jeshi wameonekana karibu. Angalia mazao ya mahindi leo.',
-                'low rainfall expected this week. consider irrigation if possible.' => 'Mvua ndogo inatarajiwa wiki hii. Fikiria umwagiliaji ikiwezekana.',
-                default => '[Swahili] ' . $message,
-            };
-        }
-
-        return $message;
-    }
-
-    /**
      * Preview alert before sending
      */
-    public function preview(Request $request)
+    public function preview(Request $request, TranslationService $translationService)
     {
         $validated = $request->validate([
             'send_mode' => 'required|in:region,individual',
@@ -78,8 +60,8 @@ class AlertController extends Controller
                 ->get();
         }
 
-        $recipients = $recipients->map(function ($farmer) use ($validated) {
-            $farmer->translated_message = $this->translateMessage(
+        $recipients = $recipients->map(function ($farmer) use ($validated, $translationService) {
+            $farmer->translated_message = $translationService->translate(
                 $validated['message'],
                 $farmer->preferred_language
             );
@@ -90,7 +72,7 @@ class AlertController extends Controller
         $selectedRegion = null;
         $selectedFarmer = null;
 
-        if ($validated['send_mode'] === 'individual' && !empty($validated['farmer_id'])) {
+        if ($validated['send_mode'] === 'individual' && ! empty($validated['farmer_id'])) {
             $selectedFarmer = Farmer::find($validated['farmer_id']);
             $selectedRegion = $selectedFarmer?->region;
         } else {
@@ -105,7 +87,7 @@ class AlertController extends Controller
         ]);
     }
 
-    public function send(Request $request, SmsService $smsService)
+    public function send(Request $request, SmsService $smsService, TranslationService $translationService)
     {
         $validated = $request->validate([
             'send_mode' => 'required|in:region,individual',
@@ -130,7 +112,8 @@ class AlertController extends Controller
         }
 
         foreach ($recipients as $farmer) {
-            $smsService->send($farmer->phone_number, $validated['message']);
+            $translatedMessage = $translationService->translate($validated['message'], $farmer->preferred_language);
+            $smsService->send($farmer->phone_number, $translatedMessage);
         }
 
         Alert::create([
@@ -142,6 +125,6 @@ class AlertController extends Controller
 
         return redirect()
             ->route('dashboard')
-            ->with('success', 'Alert sent successfully to ' . $recipients->count() . ' farmers.');
+            ->with('success', 'Alert sent successfully to '.$recipients->count().' farmers.');
     }
 }
