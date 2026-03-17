@@ -44,6 +44,7 @@ class AlertController extends Controller
         if ($language === 'Swahili') {
             return match (strtolower(trim($message))) {
                 'cloudy' => 'Kuna mawingu',
+                'sunny' => 'Kuna jua',
                 'rain expected tomorrow. delay planting by 2 days.' => 'Mvua inatarajiwa kesho. Chelewesha kupanda kwa siku 2.',
                 'fall armyworm detected nearby. check maize crops today.' => 'Funza jeshi wameonekana karibu. Angalia mazao ya mahindi leo.',
                 'low rainfall expected this week. consider irrigation if possible.' => 'Mvua ndogo inatarajiwa wiki hii. Fikiria umwagiliaji ikiwezekana.',
@@ -60,47 +61,80 @@ class AlertController extends Controller
     public function preview(Request $request)
     {
         $validated = $request->validate([
-            'region' => 'required|string',
+            'send_mode' => 'required|in:region,individual',
+            'region' => 'nullable|string',
+            'farmer_id' => 'nullable|exists:farmers,id',
             'alert_type' => 'required|string',
             'message' => 'required|string|max:160',
         ]);
 
-        $recipients = Farmer::where('region', $validated['region'])
-            ->where('wants_sms', true)
-            ->get()
-            ->map(function ($farmer) use ($validated) {
-                $farmer->translated_message = $this->translateMessage(
-                    $validated['message'],
-                    $farmer->preferred_language
-                );
+        if ($validated['send_mode'] === 'individual') {
+            $recipients = Farmer::where('id', $validated['farmer_id'])
+                ->where('wants_sms', true)
+                ->get();
+        } else {
+            $recipients = Farmer::where('region', $validated['region'])
+                ->where('wants_sms', true)
+                ->get();
+        }
 
-                return $farmer;
-            });
+        $recipients = $recipients->map(function ($farmer) use ($validated) {
+            $farmer->translated_message = $this->translateMessage(
+                $validated['message'],
+                $farmer->preferred_language
+            );
+
+            return $farmer;
+        });
+
+        $selectedRegion = null;
+        $selectedFarmer = null;
+
+        if ($validated['send_mode'] === 'individual' && !empty($validated['farmer_id'])) {
+            $selectedFarmer = Farmer::find($validated['farmer_id']);
+            $selectedRegion = $selectedFarmer?->region;
+        } else {
+            $selectedRegion = $validated['region'];
+        }
 
         return view('alerts.preview', [
             'alertData' => $validated,
             'recipients' => $recipients,
+            'selectedRegion' => $selectedRegion,
+            'selectedFarmer' => $selectedFarmer,
         ]);
     }
 
     public function send(Request $request, SmsService $smsService)
     {
         $validated = $request->validate([
-            'region' => 'required|string',
+            'send_mode' => 'required|in:region,individual',
+            'region' => 'nullable|string',
+            'farmer_id' => 'nullable|exists:farmers,id',
             'alert_type' => 'required|string',
             'message' => 'required|string|max:160',
         ]);
 
-        $recipients = Farmer::where('region', $validated['region'])
-            ->where('wants_sms', true)
-            ->get();
+        if ($validated['send_mode'] === 'individual') {
+            $recipients = Farmer::where('id', $validated['farmer_id'])
+                ->where('wants_sms', true)
+                ->get();
+
+            $targetRegion = optional($recipients->first())->region;
+        } else {
+            $recipients = Farmer::where('region', $validated['region'])
+                ->where('wants_sms', true)
+                ->get();
+
+            $targetRegion = $validated['region'];
+        }
 
         foreach ($recipients as $farmer) {
             $smsService->send($farmer->phone_number, $validated['message']);
         }
 
         Alert::create([
-            'region' => $validated['region'],
+            'region' => $targetRegion,
             'alert_type' => $validated['alert_type'],
             'message' => $validated['message'],
             'status' => 'sent',
