@@ -16,6 +16,9 @@ new class extends Component
     public string $crop_type = '';
     public string $language = '';
 
+    public string $message_content = '';
+    public ?int $selected_farmer_id = null;
+
     public function addFarmer(): void
     {
         $validated = $this->validate([
@@ -31,6 +34,32 @@ new class extends Component
 
         $this->reset(['name', 'phone_number', 'country', 'region', 'crop_type', 'language']);
         $this->modal('add-farmer-modal')->close();
+    }
+
+    public function openMessageModal(?int $farmerId = null): void
+    {
+        $this->selected_farmer_id = $farmerId;
+        $this->message_content = '';
+        $this->modal('send-message-modal')->show();
+    }
+
+    public function sendMessage(\App\Services\SmsService $smsService): void
+    {
+        $this->validate([
+            'message_content' => 'required|string|max:160',
+        ]);
+
+        if ($this->selected_farmer_id) {
+            $farmer = Farmer::find($this->selected_farmer_id);
+            if ($farmer) {
+                $smsService->send($farmer->phone_number, $this->message_content);
+            }
+        } else {
+            $smsService->sendToAll($this->message_content);
+        }
+
+        $this->modal('send-message-modal')->close();
+        $this->reset(['message_content', 'selected_farmer_id']);
     }
 
     public function with(): array
@@ -53,9 +82,12 @@ new class extends Component
     <div class="flex items-center justify-between">
         <flux:heading size="xl">{{ __('Farmers') }}</flux:heading>
 
-        <flux:modal.trigger name="add-farmer-modal">
-            <flux:button variant="primary" icon="plus">{{ __('Add Farmer') }}</flux:button>
-        </flux:modal.trigger>
+        <div class="flex gap-2">
+            <flux:button variant="outline" icon="message-square" wire:click="openMessageModal()">{{ __('Send to All') }}</flux:button>
+            <flux:modal.trigger name="add-farmer-modal">
+                <flux:button variant="primary" icon="plus">{{ __('Add Farmer') }}</flux:button>
+            </flux:modal.trigger>
+        </div>
     </div>
 
     <div class="flex items-center gap-4">
@@ -71,6 +103,7 @@ new class extends Component
                 <flux:table.column>{{ __('Region') }}</flux:table.column>
                 <flux:table.column>{{ __('Crop') }}</flux:table.column>
                 <flux:table.column>{{ __('Language') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
@@ -82,6 +115,9 @@ new class extends Component
                         <flux:table.cell>{{ $farmer->region }}</flux:table.cell>
                         <flux:table.cell>{{ $farmer->crop_type }}</flux:table.cell>
                         <flux:table.cell>{{ $farmer->language }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:button variant="ghost" icon="message-square" wire:click="openMessageModal({{ $farmer->id }})" />
+                        </flux:table.cell>
                     </flux:table.row>
                 @endforeach
             </flux:table.rows>
@@ -142,6 +178,37 @@ new class extends Component
                     <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                 </flux:modal.close>
                 <flux:button type="submit" variant="primary" class="ml-2">{{ __('Add Farmer') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <flux:modal name="send-message-modal" class="md:w-[500px]">
+        <form wire:submit="sendMessage" class="space-y-6">
+            <div>
+                <flux:heading size="lg">
+                    {{ $selected_farmer_id ? __('Send Message to :name', ['name' => \App\Models\Farmer::find($selected_farmer_id)?->name]) : __('Send Message to All Farmers') }}
+                </flux:heading>
+                <flux:subheading>{{ __('Compose an SMS message to be sent via the SMS gateway.') }}</flux:subheading>
+            </div>
+
+            <div class="space-y-4">
+                <flux:textarea
+                    wire:model="message_content"
+                    label="{{ __('Message Content') }}"
+                    placeholder="{{ __('Enter message...') }}"
+                    rows="4"
+                    required
+                    maxlength="160"
+                    helper="{{ __('Maximum 160 characters for SMS.') }}"
+                />
+            </div>
+
+            <div class="flex">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" class="ml-2">{{ __('Send Message') }}</flux:button>
             </div>
         </form>
     </flux:modal>

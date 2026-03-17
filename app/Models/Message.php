@@ -9,7 +9,7 @@ class Message extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content', 'recipient_group', 'sent_at', 'status'];
+    protected $fillable = ['content', 'phone_number', 'recipient_group', 'sent_at', 'status'];
 
     protected $casts = [
         'sent_at' => 'datetime',

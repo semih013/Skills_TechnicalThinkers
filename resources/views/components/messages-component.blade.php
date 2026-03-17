@@ -20,8 +20,9 @@ new class extends Component
     <flux:card>
         <flux:table>
             <flux:table.columns>
+                <flux:table.column>{{ __('Recipient / Phone') }}</flux:table.column>
                 <flux:table.column>{{ __('Message Content') }}</flux:table.column>
-                <flux:table.column>{{ __('Recipient Group') }}</flux:table.column>
+                <flux:table.column>{{ __('Type') }}</flux:table.column>
                 <flux:table.column>{{ __('Sent Date') }}</flux:table.column>
                 <flux:table.column>{{ __('Status') }}</flux:table.column>
             </flux:table.columns>
@@ -29,12 +30,15 @@ new class extends Component
             <flux:table.rows>
                 @foreach ($messages as $message)
                     <flux:table.row>
+                        <flux:table.cell>
+                            {{ $message->phone_number ?: $message->recipient_group }}
+                        </flux:table.cell>
                         <flux:table.cell class="max-w-xl">{{ $message->content }}</flux:table.cell>
-                        <flux:table.cell>{{ $message->recipient_group }}</flux:table.cell>
+                        <flux:table.cell>{{ $message->recipient_group ?: 'Direct' }}</flux:table.cell>
                         <flux:table.cell>{{ $message->sent_at?->format('M d, Y H:i') ?? '-' }}</flux:table.cell>
                         <flux:table.cell>
                             <flux:badge :color="match($message->status) {
-                                'Delivered' => 'green',
+                                'Delivered', 'Sent' => 'green',
                                 'Failed' => 'red',
                                 'Pending' => 'yellow',
                                 default => 'zinc'
