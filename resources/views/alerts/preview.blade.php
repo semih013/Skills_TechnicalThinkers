@@ -20,10 +20,15 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-green-50 border border-green-100 rounded-xl p-4">
+                <p class="text-sm text-gray-500">Send Mode</p>
+                <p class="text-lg font-semibold capitalize">{{ $alertData['send_mode'] }}</p>
+            </div>
+
             <div class="bg-green-50 border border-green-100 rounded-xl p-4">
                 <p class="text-sm text-gray-500">Region</p>
-                <p class="text-lg font-semibold">{{ $alertData['region'] }}</p>
+                <p class="text-lg font-semibold">{{ $selectedRegion ?? '-' }}</p>
             </div>
 
             <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
@@ -36,6 +41,15 @@
                 <p class="text-lg font-semibold">{{ $recipients->count() }}</p>
             </div>
         </div>
+
+        @if($selectedFarmer)
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-green-950 mb-3">Selected Farmer</h2>
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800">
+                    {{ $selectedFarmer->full_name }} - {{ $selectedFarmer->phone_number }}
+                </div>
+            </div>
+        @endif
 
         <div class="mb-8">
             <h2 class="text-xl font-semibold text-green-950 mb-3">Original SMS Message</h2>
@@ -68,7 +82,7 @@
                     @empty
                         <tr>
                             <td colspan="4" class="py-6 text-center text-red-600">
-                                No farmers found in this region with SMS enabled.
+                                No farmers found with SMS enabled.
                             </td>
                         </tr>
                     @endforelse
@@ -79,7 +93,9 @@
 
         <form action="{{ route('alerts.send') }}" method="POST" class="flex justify-end">
             @csrf
-            <input type="hidden" name="region" value="{{ $alertData['region'] }}">
+            <input type="hidden" name="send_mode" value="{{ $alertData['send_mode'] }}">
+            <input type="hidden" name="region" value="{{ $alertData['region'] ?? '' }}">
+            <input type="hidden" name="farmer_id" value="{{ $alertData['farmer_id'] ?? '' }}">
             <input type="hidden" name="alert_type" value="{{ $alertData['alert_type'] }}">
             <input type="hidden" name="message" value="{{ $alertData['message'] }}">
 
