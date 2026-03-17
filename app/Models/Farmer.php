@@ -14,4 +14,8 @@ class Farmer extends Model
         'preferred_language',
         'wants_sms',
     ];
+
+    protected $casts = [
+        'wants_sms' => 'boolean',
+    ];
 }

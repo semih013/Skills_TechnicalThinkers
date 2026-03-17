@@ -13,6 +13,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/farmers', [FarmerController::class, 'index'])->name('farmers.index');
+    Route::get('/farmers/create', [FarmerController::class, 'create'])->name('farmers.create');
+    Route::post('/farmers', [FarmerController::class, 'store'])->name('farmers.store');
+    Route::get('/farmers/{farmer}/edit', [FarmerController::class, 'edit'])->name('farmers.edit');
+    Route::put('/farmers/{farmer}', [FarmerController::class, 'update'])->name('farmers.update');
+    Route::delete('/farmers/{farmer}', [FarmerController::class, 'destroy'])->name('farmers.destroy');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
     Route::get('/alerts/create', [AlertController::class, 'create'])->name('alerts.create');
