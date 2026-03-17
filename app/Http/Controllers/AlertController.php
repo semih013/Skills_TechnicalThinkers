@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Farmer;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
@@ -100,7 +101,7 @@ class AlertController extends Controller
         ]);
     }
 
-    public function send(Request $request)
+    public function send(Request $request, SmsService $smsService)
     {
         $validated = $request->validate([
             'send_mode' => 'required|in:region,individual',
@@ -124,6 +125,19 @@ class AlertController extends Controller
             $targetRegion = $validated['region'];
         }
 
+        $successfulSends = 0;
+
+        foreach ($recipients as $farmer) {
+            $translatedMessage = $this->translateMessage(
+                $validated['message'],
+                $farmer->preferred_language
+            );
+
+            if ($smsService->send($farmer->phone_number, $translatedMessage)) {
+                $successfulSends++;
+            }
+        }
+
         Alert::create([
             'region' => $targetRegion,
             'alert_type' => $validated['alert_type'],
@@ -131,8 +145,14 @@ class AlertController extends Controller
             'status' => 'sent',
         ]);
 
+        if ($successfulSends === 0 && $recipients->count() > 0) {
+            return redirect()
+                ->route('dashboard')
+                ->with('error', 'Alert saved, but SMS delivery failed. Check Twilio settings and logs.');
+        }
+
         return redirect()
             ->route('dashboard')
-            ->with('success', 'Alert sent successfully to ' . $recipients->count() . ' farmers.');
+            ->with('success', 'Alert sent successfully to ' . $successfulSends . ' farmers.');
     }
 }
