@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Preview</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="bg-stone-100 text-gray-800 min-h-screen">
+
+<div class="max-w-6xl mx-auto py-10 px-6">
+    <div class="bg-white rounded-2xl shadow p-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-green-950">SMS Preview</h1>
+                <p class="text-gray-600 mt-1">Review recipients before sending the alert.</p>
+            </div>
+            <a href="{{ route('alerts.create') }}" class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50">
+                Back to Create Alert
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-green-50 border border-green-100 rounded-xl p-4">
+                <p class="text-sm text-gray-500">Region</p>
+                <p class="text-lg font-semibold">{{ $alertData['region'] }}</p>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                <p class="text-sm text-gray-500">Alert Type</p>
+                <p class="text-lg font-semibold capitalize">{{ $alertData['alert_type'] }}</p>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <p class="text-sm text-gray-500">Recipient Count</p>
+                <p class="text-lg font-semibold">{{ $recipients->count() }}</p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-green-950 mb-3">SMS Message</h2>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800">
+                {{ $alertData['message'] }}
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-green-950 mb-3">Recipients</h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                    <tr class="border-b text-left text-gray-500">
+                        <th class="py-3 pr-4">Name</th>
+                        <th class="py-3 pr-4">Phone</th>
+                        <th class="py-3 pr-4">Language</th>
+                        <th class="py-3 pr-4">Preview</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($recipients as $farmer)
+                        <tr class="border-b last:border-b-0">
+                            <td class="py-3 pr-4 font-medium">{{ $farmer->full_name }}</td>
+                            <td class="py-3 pr-4">{{ $farmer->phone_number }}</td>
+                            <td class="py-3 pr-4">{{ $farmer->preferred_language }}</td>
+                            <td class="py-3 pr-4 text-gray-700">{{ $alertData['message'] }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-red-600">
+                                No farmers found in this region with SMS enabled.
+                            </td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <form action="{{ route('alerts.send') }}" method="POST" class="flex justify-end">
+            @csrf
+            <input type="hidden" name="region" value="{{ $alertData['region'] }}">
+            <input type="hidden" name="alert_type" value="{{ $alertData['alert_type'] }}">
+            <input type="hidden" name="message" value="{{ $alertData['message'] }}">
+
+            <button
+                type="submit"
+                class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg shadow {{ $recipients->count() === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                {{ $recipients->count() === 0 ? 'disabled' : '' }}>
+                Simulate Send
+            </button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
