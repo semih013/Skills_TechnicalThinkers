@@ -38,7 +38,7 @@
         </div>
 
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-green-950 mb-3">SMS Message</h2>
+            <h2 class="text-xl font-semibold text-green-950 mb-3">Original SMS Message</h2>
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-800">
                 {{ $alertData['message'] }}
             </div>
@@ -54,7 +54,7 @@
                         <th class="py-3 pr-4">Name</th>
                         <th class="py-3 pr-4">Phone</th>
                         <th class="py-3 pr-4">Language</th>
-                        <th class="py-3 pr-4">Preview</th>
+                        <th class="py-3 pr-4">SMS Preview</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -63,7 +63,7 @@
                             <td class="py-3 pr-4 font-medium">{{ $farmer->full_name }}</td>
                             <td class="py-3 pr-4">{{ $farmer->phone_number }}</td>
                             <td class="py-3 pr-4">{{ $farmer->preferred_language }}</td>
-                            <td class="py-3 pr-4 text-gray-700">{{ $alertData['message'] }}</td>
+                            <td class="py-3 pr-4 text-gray-700">{{ $farmer->translated_message }}</td>
                         </tr>
                     @empty
                         <tr>

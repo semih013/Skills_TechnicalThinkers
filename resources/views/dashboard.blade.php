@@ -14,8 +14,8 @@
 
         <nav class="space-y-3">
             <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded bg-green-800">Dashboard</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-green-800">Submissions</a>
-            <a href="{{ route('alerts.create') }}" class="block px-4 py-2 rounded hover:bg-green-800">Alerts</a>
+            <a href="{{ route('submissions.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Submissions</a>
+            <a href="{{ route('alerts.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Alerts</a>
             <a href="{{ route('farmers.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Farmers</a>
             <a href="{{ route('sms.test') }}" class="block px-4 py-2 rounded hover:bg-green-800">SMS Preview</a>
         </nav>
@@ -44,8 +44,8 @@
                 <a href="{{ route('alerts.create') }}" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg shadow">
                     + New Alert
                 </a>
-                <a href="#" class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm">
-                    + Add Submission
+                <a href="{{ route('submissions.index') }}" class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm">
+                    View Submissions
                 </a>
             </div>
         </div>

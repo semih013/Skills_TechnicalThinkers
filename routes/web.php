@@ -21,4 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/sms-test', [SmsTestController::class, 'send'])->name('sms.test.send');
 });
 
+Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');
+
 require __DIR__.'/settings.php';

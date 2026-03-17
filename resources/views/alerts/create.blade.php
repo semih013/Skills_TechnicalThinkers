@@ -13,7 +13,7 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-3xl font-bold text-green-950">Create Alert</h1>
-                <p class="text-gray-600 mt-1">Create an SMS alert for farmers in a selected region.</p>
+                <p class="text-gray-600 mt-1">Create an SMS alert by region or for an individual farmer.</p>
             </div>
             <a href="{{ route('dashboard') }}" class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50">
                 Back to Dashboard
@@ -34,12 +34,32 @@
             @csrf
 
             <div>
+                <label class="block text-sm font-medium mb-2">Send Mode</label>
+                <select id="send_mode" name="send_mode" class="w-full border border-gray-300 rounded-lg px-4 py-3">
+                    <option value="region" {{ old('send_mode', 'region') == 'region' ? 'selected' : '' }}>By Region</option>
+                    <option value="individual" {{ old('send_mode') == 'individual' ? 'selected' : '' }}>Individual Farmer</option>
+                </select>
+            </div>
+
+            <div id="region-field">
                 <label class="block text-sm font-medium mb-2">Region</label>
                 <select name="region" class="w-full border border-gray-300 rounded-lg px-4 py-3">
                     <option value="">Select region</option>
                     @foreach($regions as $region)
                         <option value="{{ $region }}" {{ old('region') == $region ? 'selected' : '' }}>
                             {{ $region }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div id="farmer-field" class="hidden">
+                <label class="block text-sm font-medium mb-2">Farmer</label>
+                <select name="farmer_id" class="w-full border border-gray-300 rounded-lg px-4 py-3">
+                    <option value="">Select farmer</option>
+                    @foreach($farmers as $farmer)
+                        <option value="{{ $farmer->id }}" {{ old('farmer_id') == $farmer->id ? 'selected' : '' }}>
+                            {{ $farmer->full_name }} - {{ $farmer->region }} - {{ $farmer->phone_number }}
                         </option>
                     @endforeach
                 </select>
@@ -75,6 +95,25 @@
         </form>
     </div>
 </div>
+
+<script>
+    const sendMode = document.getElementById('send_mode');
+    const regionField = document.getElementById('region-field');
+    const farmerField = document.getElementById('farmer-field');
+
+    function toggleFields() {
+        if (sendMode.value === 'individual') {
+            regionField.classList.add('hidden');
+            farmerField.classList.remove('hidden');
+        } else {
+            regionField.classList.remove('hidden');
+            farmerField.classList.add('hidden');
+        }
+    }
+
+    sendMode.addEventListener('change', toggleFields);
+    toggleFields();
+</script>
 
 </body>
 </html>
