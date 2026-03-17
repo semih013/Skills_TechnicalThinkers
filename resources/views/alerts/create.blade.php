@@ -39,7 +39,7 @@
                     <select name="region" class="w-full border border-gray-300 rounded-lg px-4 py-3">
                         <option value="">Select region</option>
                         @foreach($regions as $region)
-                            <option value="{{ $region }}" {{ old('region') == $region ? 'selected' : '' }}>
+                            <option value="{{ $region }}" {{ old('region', $selectedRegion ?? '') == $region ? 'selected' : '' }}>
                                 {{ $region }}
                             </option>
                         @endforeach
@@ -71,7 +71,18 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-2">SMS Message</label>
+
+                    <div class="mb-3 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onclick="setMessage('Market price for maize is decreasing. Consider selling early or storing safely.')"
+                            class="text-sm px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200">
+                            📊 Maize Price Alert
+                        </button>
+                    </div>
+
                     <textarea
+                        id="message"
                         name="message"
                         rows="4"
                         maxlength="160"
@@ -102,6 +113,10 @@
                 regionField.classList.remove('hidden');
                 farmerField.classList.add('hidden');
             }
+        }
+
+        function setMessage(text) {
+            document.getElementById('message').value = text;
         }
 
         sendMode.addEventListener('change', toggleFields);
