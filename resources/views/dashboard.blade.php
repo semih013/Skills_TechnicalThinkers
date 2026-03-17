@@ -39,6 +39,86 @@
         </div>
     </div>
 
+    <section class="bg-white rounded-2xl shadow p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+            <div>
+                <h3 class="text-xl font-semibold text-green-950">7-Day Weather Forecast</h3>
+                <p class="text-sm text-gray-500 mt-1">Live forecast for {{ $selectedRegion }}</p>
+            </div>
+
+            <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-3">
+                <label for="region" class="text-sm text-gray-600">Region</label>
+                <select
+                    name="region"
+                    id="region"
+                    onchange="this.form.submit()"
+                    class="border border-gray-300 rounded-lg px-4 py-2 bg-white">
+                    @foreach(array_keys($regionCoordinates) as $region)
+                        <option value="{{ $region }}" {{ $selectedRegion === $region ? 'selected' : '' }}>
+                            {{ $region }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+
+        @if(!empty($forecast) && count($forecast) > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                @foreach($forecast as $day)
+                    <div class="rounded-xl border border-gray-200 bg-stone-50 p-4">
+                        <p class="text-sm text-gray-500">{{ $day['day'] ?? '-' }}</p>
+                        <p class="text-xs text-gray-400 mb-3">
+                            {{ !empty($day['date']) ? \Carbon\Carbon::parse($day['date'])->format('d M') : '-' }}
+                        </p>
+
+                        <div class="text-3xl mb-2">
+                            @if(($day['condition'] ?? '') === 'Clear')
+                                ☀️
+                            @elseif(($day['condition'] ?? '') === 'Cloudy')
+                                ☁️
+                            @elseif(($day['condition'] ?? '') === 'Rain' || ($day['condition'] ?? '') === 'Rain Showers')
+                                🌧️
+                            @elseif(($day['condition'] ?? '') === 'Thunderstorm')
+                                ⛈️
+                            @elseif(($day['condition'] ?? '') === 'Drizzle')
+                                🌦️
+                            @elseif(($day['condition'] ?? '') === 'Fog')
+                                🌫️
+                            @elseif(($day['condition'] ?? '') === 'Snow' || ($day['condition'] ?? '') === 'Snow Showers')
+                                ❄️
+                            @else
+                                🌤️
+                            @endif
+                        </div>
+
+                        <p class="font-semibold text-green-950">{{ $day['condition'] ?? 'Unknown' }}</p>
+
+                        @php
+                            $tempMax = $day['temp_max'] ?? null;
+                            $tempMin = $day['temp_min'] ?? null;
+                        @endphp
+
+                        <p class="text-sm text-gray-600 mt-1">
+                            @if($tempMax !== null && $tempMin !== null)
+                                {{ round($tempMax) }}° / {{ round($tempMin) }}°
+                            @else
+                                -
+                            @endif
+                        </p>
+
+                        <p class="text-sm text-blue-700 mt-1">
+                            Rain: {{ $day['rain_chance'] ?? 0 }}%
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="p-4 rounded-xl bg-yellow-50 border border-yellow-100 text-yellow-800">
+                Forecast data is currently unavailable.
+            </div>
+        @endif
+    </section>
+
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <section class="xl:col-span-2 bg-white rounded-2xl shadow p-6">
             <div class="flex items-center justify-between mb-4">
