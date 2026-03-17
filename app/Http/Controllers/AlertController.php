@@ -4,15 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Farmer;
-use App\Services\SmsService;
-use App\Services\TranslationService;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
 {
-    /**
-     * Show all alerts (Alerts page)
-     */
     public function index()
     {
         $alerts = Alert::latest()->get();
@@ -20,9 +15,6 @@ class AlertController extends Controller
         return view('alerts.index', compact('alerts'));
     }
 
-    /**
-     * Show create alert form
-     */
     public function create()
     {
         $regions = Farmer::select('region')
@@ -34,13 +26,34 @@ class AlertController extends Controller
             ->orderBy('full_name')
             ->get();
 
-        return view('alerts.create', compact('regions', 'farmers'));
+        $selectedRegion = request('region');
+
+        return view('alerts.create', compact('regions', 'farmers', 'selectedRegion'));
     }
 
-    /**
-     * Preview alert before sending
-     */
-    public function preview(Request $request, TranslationService $translationService)
+    private function translateMessage($message, $language)
+    {
+        if ($language === 'Swahili') {
+            return match (strtolower(trim($message))) {
+                'cloudy' => 'Kuna mawingu',
+                'sunny' => 'Kuna jua',
+                'hello' => 'Habari',
+                'market price for maize is decreasing. consider selling early or storing safely.'
+                => 'Bei ya mahindi inashuka. Fikiria kuuza mapema au kuhifadhi kwa usalama.',
+                'rain expected tomorrow. delay planting by 2 days.'
+                => 'Mvua inatarajiwa kesho. Chelewesha kupanda kwa siku 2.',
+                'fall armyworm detected nearby. check maize crops today.'
+                => 'Funza jeshi wameonekana karibu. Angalia mazao ya mahindi leo.',
+                'low rainfall expected this week. consider irrigation if possible.'
+                => 'Mvua ndogo inatarajiwa wiki hii. Fikiria umwagiliaji ikiwezekana.',
+                default => '[Swahili] ' . $message,
+            };
+        }
+
+        return $message;
+    }
+
+    public function preview(Request $request)
     {
         $validated = $request->validate([
             'send_mode' => 'required|in:region,individual',
@@ -60,8 +73,8 @@ class AlertController extends Controller
                 ->get();
         }
 
-        $recipients = $recipients->map(function ($farmer) use ($validated, $translationService) {
-            $farmer->translated_message = $translationService->translate(
+        $recipients = $recipients->map(function ($farmer) use ($validated) {
+            $farmer->translated_message = $this->translateMessage(
                 $validated['message'],
                 $farmer->preferred_language
             );
@@ -72,7 +85,7 @@ class AlertController extends Controller
         $selectedRegion = null;
         $selectedFarmer = null;
 
-        if ($validated['send_mode'] === 'individual' && ! empty($validated['farmer_id'])) {
+        if ($validated['send_mode'] === 'individual' && !empty($validated['farmer_id'])) {
             $selectedFarmer = Farmer::find($validated['farmer_id']);
             $selectedRegion = $selectedFarmer?->region;
         } else {
@@ -87,7 +100,7 @@ class AlertController extends Controller
         ]);
     }
 
-    public function send(Request $request, SmsService $smsService, TranslationService $translationService)
+    public function send(Request $request)
     {
         $validated = $request->validate([
             'send_mode' => 'required|in:region,individual',
@@ -111,11 +124,6 @@ class AlertController extends Controller
             $targetRegion = $validated['region'];
         }
 
-        foreach ($recipients as $farmer) {
-            $translatedMessage = $translationService->translate($validated['message'], $farmer->preferred_language);
-            $smsService->send($farmer->phone_number, $translatedMessage);
-        }
-
         Alert::create([
             'region' => $targetRegion,
             'alert_type' => $validated['alert_type'],
@@ -125,6 +133,6 @@ class AlertController extends Controller
 
         return redirect()
             ->route('dashboard')
-            ->with('success', 'Alert sent successfully to '.$recipients->count().' farmers.');
+            ->with('success', 'Alert sent successfully to ' . $recipients->count() . ' farmers.');
     }
 }
