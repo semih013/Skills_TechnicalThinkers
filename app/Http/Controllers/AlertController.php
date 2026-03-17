@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Farmer;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 
 class AlertController extends Controller
@@ -82,10 +83,7 @@ class AlertController extends Controller
         ]);
     }
 
-    /**
-     * Simulate sending alert
-     */
-    public function send(Request $request)
+    public function send(Request $request, SmsService $smsService)
     {
         $validated = $request->validate([
             'region' => 'required|string',
@@ -96,6 +94,10 @@ class AlertController extends Controller
         $recipients = Farmer::where('region', $validated['region'])
             ->where('wants_sms', true)
             ->get();
+
+        foreach ($recipients as $farmer) {
+            $smsService->send($farmer->phone_number, $validated['message']);
+        }
 
         Alert::create([
             'region' => $validated['region'],

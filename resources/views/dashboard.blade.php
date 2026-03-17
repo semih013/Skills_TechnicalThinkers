@@ -17,7 +17,7 @@
             <a href="{{ route('submissions.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Submissions</a>
             <a href="{{ route('alerts.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Alerts</a>
             <a href="{{ route('farmers.index') }}" class="block px-4 py-2 rounded hover:bg-green-800">Farmers</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-green-800">SMS Preview</a>
+            <a href="{{ route('sms.test') }}" class="block px-4 py-2 rounded hover:bg-green-800">SMS Preview</a>
         </nav>
 
         <div class="mt-10 text-sm text-green-100">
