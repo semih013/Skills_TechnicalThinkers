@@ -15,6 +15,18 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('farmers')" :current="request()->routeIs('farmers')" wire:navigate>
+                        {{ __('Farmers') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="bell" :href="route('alerts')" :current="request()->routeIs('alerts')" wire:navigate>
+                        {{ __('Alerts') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="database" :href="route('data-sources')" :current="request()->routeIs('data-sources')" wire:navigate>
+                        {{ __('Data Sources') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="message-square" :href="route('messages')" :current="request()->routeIs('messages')" wire:navigate>
+                        {{ __('Messages') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
