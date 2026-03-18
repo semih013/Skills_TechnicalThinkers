@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Farmer;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\SmsMessage;
@@ -341,6 +342,19 @@ class AlertController extends Controller
                 ->get();
 
             $targetRegion = $validated['region'];
+        }
+
+        $successfulSends = 0;
+
+        foreach ($recipients as $farmer) {
+            $translatedMessage = $this->translateMessage(
+                $validated['message'],
+                $farmer->preferred_language
+            );
+
+            if ($smsService->send($farmer->phone_number, $translatedMessage)) {
+                $successfulSends++;
+            }
         }
 
         Alert::create([
