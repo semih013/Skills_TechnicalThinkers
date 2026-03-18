@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Farmer;
+use App\Models\SmsMessage;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\SmsMessage;
-use App\Services\SmsService;
 
 class AlertController extends Controller
 {
@@ -344,25 +343,14 @@ class AlertController extends Controller
             $targetRegion = $validated['region'];
         }
 
-        $successfulSends = 0;
-
-        foreach ($recipients as $farmer) {
-            $translatedMessage = $this->translateMessage(
-                $validated['message'],
-                $farmer->preferred_language
-            );
-
-            if ($smsService->send($farmer->phone_number, $translatedMessage)) {
-                $successfulSends++;
-            }
-        }
-
         Alert::create([
             'region' => $targetRegion,
             'alert_type' => $validated['alert_type'],
             'message' => $validated['message'],
             'status' => 'sent',
         ]);
+
+        $successfulSends = 0;
 
         foreach ($recipients as $recipient) {
             $translatedMessage = $validated['message'];
@@ -390,11 +378,15 @@ class AlertController extends Controller
                 'sent_at' => now(),
             ]);
 
-            $smsService->send($recipient->phone_number, $translatedMessage);
+            if ($smsService->send($recipient->phone_number, $translatedMessage)) {
+                $successfulSends++;
+            }
         }
 
         return redirect()
-            ->route('sms.inbox')
-            ->with('success', 'Alert sent successfully to ' . $recipients->count() . ' farmers.');
+            ->route('sms.inbox', [
+                'farmer_id' => $recipients->first()?->id
+            ])
+            ->with('success', 'Alert sent successfully to ' . $successfulSends . ' farmers.');
     }
 }
