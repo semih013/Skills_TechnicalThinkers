@@ -8,7 +8,7 @@
         </div>
 
         <div class="mt-4 md:mt-0 flex gap-3">
-            <a href="{{ route('alerts.create') }}" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg shadow">
+            <a href="{{ route('alerts.create', ['region' => $selectedRegion]) }}" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg shadow">
                 + New Alert
             </a>
             <a href="{{ route('submissions.index') }}" class="bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm">

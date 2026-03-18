@@ -6,6 +6,7 @@ use App\Http\Controllers\FarmerController;
 use App\Http\Controllers\SmsTestController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SmsInboxController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -26,6 +27,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/sms-test', [SmsTestController::class, 'index'])->name('sms.test');
     Route::post('/sms-test', [SmsTestController::class, 'send'])->name('sms.test.send');
+
+
+    Route::get('/sms-inbox', [SmsInboxController::class, 'index'])->name('sms.inbox');
+    Route::get('/sms-inbox/latest', [SmsInboxController::class, 'latest'])->name('sms.inbox.latest');
 });
 
 Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');

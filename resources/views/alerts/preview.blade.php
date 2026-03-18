@@ -51,6 +51,22 @@
                 </div>
             </div>
 
+            @if(!empty($weatherSummary))
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-green-950 mb-3">Weather Summary Added Automatically</h2>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-gray-800">
+                        {{ $weatherSummary }}
+                    </div>
+                </div>
+            @endif
+
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-green-950 mb-3">Final SMS Message</h2>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-gray-800">
+                    {{ $finalMessage }}
+                </div>
+            </div>
+
             <div class="mb-8">
                 <h2 class="text-xl font-semibold text-green-950 mb-3">Recipients</h2>
 
@@ -90,13 +106,13 @@
                 <input type="hidden" name="region" value="{{ $alertData['region'] ?? '' }}">
                 <input type="hidden" name="farmer_id" value="{{ $alertData['farmer_id'] ?? '' }}">
                 <input type="hidden" name="alert_type" value="{{ $alertData['alert_type'] }}">
-                <input type="hidden" name="message" value="{{ $alertData['message'] }}">
+                <input type="hidden" name="message" value="{{ $finalMessage }}">
 
                 <button
                     type="submit"
                     class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg shadow {{ $recipients->count() === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                     {{ $recipients->count() === 0 ? 'disabled' : '' }}>
-                    Simulate Send
+                    Send Alert
                 </button>
             </form>
         </div>
