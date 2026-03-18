@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
         Farmer::create([
             'full_name' => 'Amina Juma',
             'phone_number' => '+255700333444',
-            'region' => 'Kilimanjaro',
+            'region' => 'Arusha',
             'village' => 'Moshi Rural',
             'preferred_language' => 'English',
             'wants_sms' => true,
@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
             'region' => 'Dodoma',
             'village' => 'Chamwino',
             'preferred_language' => 'Swahili',
-            'wants_sms' => false,
+            'wants_sms' => true,
         ]);
     }
 }
