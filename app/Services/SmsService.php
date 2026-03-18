@@ -7,11 +7,9 @@ use Twilio\Rest\Client;
 
 class SmsService
 {
-    private string $sid;
-
-    private string $token;
-
-    private string $from;
+    private ?string $sid;
+    private ?string $token;
+    private ?string $from;
 
     public function __construct()
     {
@@ -22,8 +20,13 @@ class SmsService
 
     public function send(string $to, string $message): bool
     {
+        if (empty($this->sid) || empty($this->token) || empty($this->from)) {
+            return false;
+        }
+
         try {
             $client = new Client($this->sid, $this->token);
+
             $client->messages->create($to, [
                 'from' => $this->from,
                 'body' => $message,

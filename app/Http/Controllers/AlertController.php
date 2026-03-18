@@ -387,6 +387,6 @@ class AlertController extends Controller
             ->route('sms.inbox', [
                 'farmer_id' => $recipients->first()?->id
             ])
-            ->with('success', 'Alert sent successfully to ' . $successfulSends . ' farmers.');
+            ->with('success', 'Alert sent successfully.');
     }
 }
