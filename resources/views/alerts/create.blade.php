@@ -73,22 +73,40 @@
                     <label class="block text-sm font-medium mb-2">SMS Message</label>
 
                     <div class="mb-3 flex flex-wrap gap-2">
+                        @if(!empty($suggestedAlert))
+                            <button
+                                type="button"
+                                onclick="setMessage(@js($suggestedAlert))"
+                                class="text-sm px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200">
+                                🌦 Use Suggested Weather Alert
+                            </button>
+                        @endif
+
                         <button
                             type="button"
-                            onclick="setMessage('Market price for maize is decreasing. Consider selling early or storing safely.')"
+                            onclick="appendMessage('Market price for maize is decreasing. Consider selling early or storing safely.')"
                             class="text-sm px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200">
-                            📊 Maize Price Alert
+                            📊 Add Maize Price Alert
                         </button>
                     </div>
+
+                    @if(!empty($suggestedAlert))
+                        <div class="mb-3 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm">
+                            <span class="font-semibold">Suggested:</span> {{ $suggestedAlert }}
+                        </div>
+                    @endif
 
                     <textarea
                         id="message"
                         name="message"
                         rows="4"
-                        maxlength="160"
+                        maxlength="250"
                         class="w-full border border-gray-300 rounded-lg px-4 py-3"
                         placeholder="Write your SMS alert here...">{{ old('message') }}</textarea>
-                    <p class="text-sm text-gray-500 mt-1">Keep message short for SMS (max 160 characters).</p>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Review the suggested alert, then edit or add more information before preview.
+                    </p>
                 </div>
 
                 <div class="flex justify-end">
@@ -117,6 +135,17 @@
 
         function setMessage(text) {
             document.getElementById('message').value = text;
+        }
+
+        function appendMessage(text) {
+            const textarea = document.getElementById('message');
+            const current = textarea.value.trim();
+
+            if (current.length === 0) {
+                textarea.value = text;
+            } else if (!current.includes(text)) {
+                textarea.value = current + ' ' + text;
+            }
         }
 
         sendMode.addEventListener('change', toggleFields);
