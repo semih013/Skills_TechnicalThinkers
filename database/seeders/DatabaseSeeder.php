@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
             'phone_number' => '+255700333444',
             'region' => 'Arusha',
             'village' => 'Moshi Rural',
-            'preferred_language' => 'English',
+            'preferred_language' => 'Swahili',
             'wants_sms' => true,
         ]);
 
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
             'phone_number' => '+255700555666',
             'region' => 'Dodoma',
             'village' => 'Chamwino',
-            'preferred_language' => 'Swahili',
+            'preferred_language' => 'English',
             'wants_sms' => true,
         ]);
     }
