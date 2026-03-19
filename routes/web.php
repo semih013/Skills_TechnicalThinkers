@@ -7,6 +7,8 @@ use App\Http\Controllers\SmsTestController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmsInboxController;
+use App\Http\Controllers\SmsRegistrationDemoController;
+
 
 Route::view('/', 'welcome')->name('home');
 
@@ -31,6 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/sms-inbox', [SmsInboxController::class, 'index'])->name('sms.inbox');
     Route::get('/sms-inbox/latest', [SmsInboxController::class, 'latest'])->name('sms.inbox.latest');
+
+    Route::get('/sms-registration-demo', [SmsRegistrationDemoController::class, 'index'])->name('sms.registration.demo');
+    Route::post('/sms-registration-demo', [SmsRegistrationDemoController::class, 'store'])->name('sms.registration.demo.store');
+
 });
 
 Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');
