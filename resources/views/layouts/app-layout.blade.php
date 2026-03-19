@@ -37,6 +37,11 @@
                class="block px-4 py-2 rounded {{ request()->routeIs('farmers.*') ? 'bg-green-800' : 'hover:bg-green-800' }}">
                 Farmers
             </a>
+
+            <a href="{{ route('sms.registration.demo') }}"
+               class="block px-4 py-2 rounded {{ request()->routeIs('sms.registration.demo') ? 'bg-green-800' : 'hover:bg-green-800' }}">
+                SMS Registration
+            </a>
         </nav>
 
         <div class="mt-10 text-sm text-green-100">
